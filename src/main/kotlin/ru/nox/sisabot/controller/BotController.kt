@@ -9,6 +9,7 @@ import io.ktor.serialization.kotlinx.json.*
 import jakarta.annotation.PostConstruct
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -82,7 +83,7 @@ class BotController : TelegramLongPollingBot() {
                             username += "${args[i]} "
                         }
                         println(LocalDateTime.now().toString() + " " + "username = " + username)
-                        CoroutineScope(Dispatchers.IO).launch {
+                        GlobalScope.launch {
                             val httpClient = HttpClient(CIO) {
                                 install(ContentNegotiation) {
                                     json(Json {
