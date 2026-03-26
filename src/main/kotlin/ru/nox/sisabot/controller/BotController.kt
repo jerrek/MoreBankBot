@@ -59,6 +59,7 @@ class BotController : TelegramLongPollingBot() {
         if (update.hasMessage() && update.message.hasText()) {
             val text = update.message.text
             val chatId = update.message.chatId.toString()
+            println(LocalDateTime.now().toString() + " " + "Получена команда! chatId - " + chatId + " " + "text - " + text)
             when {
                 text.startsWith("/start") -> {
                     println(LocalDateTime.now().toString() + " " + "Получена команда start")
