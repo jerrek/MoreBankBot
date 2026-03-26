@@ -7,10 +7,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.serialization.kotlinx.json.*
 import jakarta.annotation.PostConstruct
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.springframework.stereotype.Service
@@ -54,58 +51,68 @@ class BotController : TelegramLongPollingBot() {
     override fun getBotUsername(): String = "MoreBank_bot"
 
     override fun getBotToken(): String =
-        System.getenv("TELEGRAM_TOKEN") ?: "8396367750:AAFrn_V9Ufcxw9cCAwk4VGQOphj9OC2019s"
+        System.getenv("TELEGRAM_TOKEN")
 
     override fun onUpdateReceived(update: Update) {
         if (update.hasMessage() && update.message.hasText()) {
             val text = update.message.text
             val chatId = update.message.chatId.toString()
-            println(LocalDateTime.now().toString() + " " + "Получена команда! chatId - " + chatId + " " + "text - " + text)
+            println("${LocalDateTime.now()} Получена команда! chatId - $chatId text - $text")
+
             when {
                 text.startsWith("/start") -> {
-                    println(LocalDateTime.now().toString() + " " + "Получена команда start")
+                    println("${LocalDateTime.now()} Получена команда start")
                     sendWelcomeKeyboard(chatId)
                     sendMessage(chatId, "Привет! Чтобы узнать свои баллы, введи /points ФИО или название команды")
                 }
 
                 text.startsWith("/points") -> {
-                    println(LocalDateTime.now().toString() + " " + "Получена команда points")
+                    println("${LocalDateTime.now()} Получена команда points")
                     val args = text.split(" ")
+
                     if (args.size == 1) {
-                        println(LocalDateTime.now().toString() + " " + "Введеномало символов")
+                        println("${LocalDateTime.now()} Введено мало символов")
                         sendMessage(chatId, "Пожалуйста, введи /points ФИО или название команды")
                     } else {
-                        var username = ""
-                        for (i in args.indices) {
-                            if (i == 0) {
-                                continue
-                            }
-                            username += "${args[i]} "
-                        }
-                        println(LocalDateTime.now().toString() + " " + "username = " + username)
-                        GlobalScope.launch {
-                            val httpClient = HttpClient(CIO) {
-                                install(ContentNegotiation) {
-                                    json(Json {
-                                        ignoreUnknownKeys = true
-                                    })
+                        val username = args.drop(1).joinToString(" ")
+                        println("${LocalDateTime.now()} username = $username")
+
+                        // Используем runBlocking для синхронного выполнения suspend-функции
+                        try {
+                            println("${LocalDateTime.now()} Начинаю запрос через runBlocking")
+
+                            val result = runBlocking {
+                                println("${LocalDateTime.now()} Внутри runBlocking, создаю HTTP клиент")
+                                val httpClient = HttpClient(CIO) {
+                                    install(ContentNegotiation) {
+                                        json(Json {
+                                            ignoreUnknownKeys = true
+                                        })
+                                    }
                                 }
+
+                                println("${LocalDateTime.now()} Отправляется запрос в гугл таблицы")
+                                val rawResponse: String = httpClient.get(gasUrl) {
+                                    parameter("username", username)
+                                }.bodyAsText()
+
+                                println("${LocalDateTime.now()} Ответ от гугл получен: $rawResponse")
+                                httpClient.close()
+                                rawResponse
                             }
-                            println(LocalDateTime.now().toString() + " " + "Отправляется запрос в гугл таблицы")
-                            val rawResponse: String = httpClient.get(gasUrl) {
-                                parameter("username", username)
-                            }.bodyAsText()
-                            println(LocalDateTime.now().toString() + " " + rawResponse)
-                            println(LocalDateTime.now().toString() + " " + "Ответ от гугл получен")
-                            try {
-                                println(LocalDateTime.now().toString() + " " + "Формирование ответа")
-                                val userPointsResponse = Json.decodeFromString<UserPointsResponse>(rawResponse)
-                                println(LocalDateTime.now().toString() + " " + "Отправка ответа")
-                                sendMessage(chatId, "$username - ${userPointsResponse.score}")
-                                println(LocalDateTime.now().toString() + " " + "Ответ в бот на запрос отправлен ")
-                            } catch (e: Exception) {
-                                sendMessage(chatId, "Пользователь не найден")
-                            }
+
+                            println("${LocalDateTime.now()} Формирование ответа")
+                            val userPointsResponse = Json.decodeFromString<UserPointsResponse>(result)
+
+                            println("${LocalDateTime.now()} Отправка ответа пользователю")
+                            sendMessage(chatId, "$username - ${userPointsResponse.score}")
+
+                            println("${LocalDateTime.now()} Ответ в бот на запрос отправлен")
+
+                        } catch (e: Exception) {
+                            println("${LocalDateTime.now()} ОШИБКА: ${e.javaClass.simpleName} - ${e.message}")
+                            e.printStackTrace()
+                            sendMessage(chatId, "Ошибка при запросе: ${e.message}")
                         }
                     }
                 }
@@ -121,6 +128,7 @@ class BotController : TelegramLongPollingBot() {
         try {
             execute(message)
         } catch (e: TelegramApiException) {
+            println("${LocalDateTime.now()} Ошибка отправки сообщения: ${e.message}")
             e.printStackTrace()
         }
     }
