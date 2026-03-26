@@ -58,6 +58,14 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.10")
 }
 
+configurations.all {
+    resolutionStrategy {
+        force("io.ktor:ktor-client-core:2.3.10")
+        force("io.ktor:ktor-client-cio:2.3.10")
+        force("io.ktor:ktor-utils:2.3.10")
+    }
+}
+
 tasks.test {
     useJUnitPlatform()
 }
