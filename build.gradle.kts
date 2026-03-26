@@ -48,7 +48,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
 
     // Logging
-    implementation("org.slf4j:slf4j-simple:2.0.9")
+//    implementation("org.slf4j:slf4j-simple:2.0.9")
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
