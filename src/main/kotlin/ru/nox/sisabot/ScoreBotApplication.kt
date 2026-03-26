@@ -5,7 +5,7 @@ import org.springframework.boot.runApplication
 import org.springframework.context.annotation.ComponentScan
 
 @SpringBootApplication
-@ComponentScan(basePackages = ["ru.nox.sisabot"])
+@ComponentScan(basePackages = ["ru.nox.sisabot.controller"])
 open class ScoreBotApplication
 
 fun main(args: Array<String>) {
