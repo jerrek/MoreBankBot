@@ -53,7 +53,7 @@ class BotController : TelegramLongPollingBot() {
     override fun getBotUsername(): String = "MoreBank_bot"
 
     override fun getBotToken(): String =
-        System.getenv("TELEGRAM_TOKEN") ?: "8396367750:AAFrn_V9Ufcxw9cCAwk4VGQOphj9OC2019s"
+        System.getenv("TELEGRAM_TOKEN")
 
     override fun onUpdateReceived(update: Update) {
         if (update.hasMessage() && update.message.hasText()) {
