@@ -26,6 +26,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession
 import java.time.LocalDateTime
+
 @Service
 class BotController : TelegramLongPollingBot() {
 
@@ -52,7 +53,7 @@ class BotController : TelegramLongPollingBot() {
     override fun getBotUsername(): String = "MoreBank_bot"
 
     override fun getBotToken(): String =
-        System.getenv("TELEGRAM_TOKEN")
+        System.getenv("TELEGRAM_TOKEN") ?: "8396367750:AAFrn_V9Ufcxw9cCAwk4VGQOphj9OC2019s"
 
     override fun onUpdateReceived(update: Update) {
         if (update.hasMessage() && update.message.hasText()) {
@@ -60,13 +61,16 @@ class BotController : TelegramLongPollingBot() {
             val chatId = update.message.chatId.toString()
             when {
                 text.startsWith("/start") -> {
+                    println(LocalDateTime.now().toString() + " " + "Получена команда start")
                     sendWelcomeKeyboard(chatId)
                     sendMessage(chatId, "Привет! Чтобы узнать свои баллы, введи /points ФИО или название команды")
                 }
 
                 text.startsWith("/points") -> {
+                    println(LocalDateTime.now().toString() + " " + "Получена команда points")
                     val args = text.split(" ")
                     if (args.size == 1) {
+                        println(LocalDateTime.now().toString() + " " + "Введеномало символов")
                         sendMessage(chatId, "Пожалуйста, введи /points ФИО или название команды")
                     } else {
                         var username = ""
@@ -76,6 +80,7 @@ class BotController : TelegramLongPollingBot() {
                             }
                             username += "${args[i]} "
                         }
+                        println(LocalDateTime.now().toString() + " " + "username = " + username)
                         CoroutineScope(Dispatchers.IO).launch {
                             val httpClient = HttpClient(CIO) {
                                 install(ContentNegotiation) {
@@ -84,21 +89,24 @@ class BotController : TelegramLongPollingBot() {
                                     })
                                 }
                             }
+                            println(LocalDateTime.now().toString() + " " + "Отправляется запрос в гугл таблицы")
                             val rawResponse: String = httpClient.get(gasUrl) {
                                 parameter("username", username)
                             }.bodyAsText()
                             println(LocalDateTime.now().toString() + " " + rawResponse)
-
+                            println(LocalDateTime.now().toString() + " " + "Ответ от гугл получен")
                             try {
+                                println(LocalDateTime.now().toString() + " " + "Формирование ответа")
                                 val userPointsResponse = Json.decodeFromString<UserPointsResponse>(rawResponse)
+                                println(LocalDateTime.now().toString() + " " + "Отправка ответа")
                                 sendMessage(chatId, "$username - ${userPointsResponse.score}")
+                                println(LocalDateTime.now().toString() + " " + "Ответ в бот на запрос отправлен ")
                             } catch (e: Exception) {
                                 sendMessage(chatId, "Пользователь не найден")
                             }
                         }
                     }
                 }
-
                 else -> {
                     sendMessage(chatId, "Неизвестная команда.")
                 }
