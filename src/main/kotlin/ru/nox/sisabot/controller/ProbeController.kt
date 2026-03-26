@@ -13,7 +13,7 @@ class ProbeController() {
     }
 
     // Добавим GET для проверки, что контроллер вообще работает
-    @PostMapping("/ping")
+    @GetMapping("/ping")
     fun test(): String {
         return "Webhook endpoint is alive! Use POST for Telegram updates."
     }
