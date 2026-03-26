@@ -8,6 +8,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.TelegramBotsApi
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
+import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault
@@ -39,6 +40,16 @@ class BotController : TelegramLongPollingBot() {
             println("Бот успешно зарегистрирован!")
         } catch (e: TelegramApiException) {
             println("Ошибка регистрации бота:")
+            e.printStackTrace()
+        }
+
+        try {
+            val setWebhook = SetWebhook()
+            setWebhook.setUrl("https://morebankbot.onrender.com/webhook")
+            execute(setWebhook)
+            println("Webhook установлен на https://morebankbot.onrender.com/webhook")
+        } catch (e: TelegramApiException) {
+            println("Ошибка установки webhook:")
             e.printStackTrace()
         }
     }
