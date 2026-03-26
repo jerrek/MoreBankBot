@@ -8,6 +8,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.TelegramBotsApi
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
+import org.telegram.telegrambots.meta.api.methods.updates.DeleteWebhook
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand
@@ -30,8 +31,9 @@ class BotController : TelegramLongPollingBot() {
     @PostConstruct
     fun registerBot() {
         try {
-            val botsApi = TelegramBotsApi(DefaultBotSession::class.java)
-            botsApi.registerBot(this)
+//            Отключает лонг полинг
+//            val botsApi = TelegramBotsApi(DefaultBotSession::class.java)
+//            botsApi.registerBot(this)
             val commands = listOf(
                 BotCommand("start", "Инструкция"),
                 BotCommand("points", "/points ФИО или название команды")
@@ -44,6 +46,10 @@ class BotController : TelegramLongPollingBot() {
         }
 
         try {
+            // Удаляем старый webhook (на всякий случай)
+            val deleteWebhook = DeleteWebhook()
+            execute(deleteWebhook)
+            println("✅ Старый webhook удалён")
             val setWebhook = SetWebhook()
             setWebhook.setUrl("https://morebankbot.onrender.com/webhook")
             execute(setWebhook)
