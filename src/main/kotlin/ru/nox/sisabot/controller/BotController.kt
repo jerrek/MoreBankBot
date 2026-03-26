@@ -26,7 +26,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession
 import java.time.LocalDateTime
-
 @Service
 class BotController : TelegramLongPollingBot() {
 
@@ -93,12 +92,13 @@ class BotController : TelegramLongPollingBot() {
                             try {
                                 val userPointsResponse = Json.decodeFromString<UserPointsResponse>(rawResponse)
                                 sendMessage(chatId, "$username - ${userPointsResponse.score}")
-                            }catch(e: Exception) {
+                            } catch (e: Exception) {
                                 sendMessage(chatId, "Пользователь не найден")
                             }
                         }
                     }
                 }
+
                 else -> {
                     sendMessage(chatId, "Неизвестная команда.")
                 }

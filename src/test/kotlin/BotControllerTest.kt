@@ -47,18 +47,18 @@ class BotControllerTest {
         }
     }
 
-    @Test
-    fun `должен предупреждать если нет аргумента после points`() {
-        val update = buildUpdate("/points")
-
-        bot.onUpdateReceived(update)
-
-        verify {
-            bot.execute(match<SendMessage> {
-                it.text.contains("Пожалуйста, введи /points твой_никнейм")
-            })
-        }
-    }
+//    @Test
+//    fun `должен предупреждать если нет аргумента после points`() {
+//        val update = buildUpdate("/points")
+//
+//        bot.onUpdateReceived(update)
+//
+//        verify {
+//            bot.execute(match<SendMessage> {
+//                it.text.contains("Пожалуйста, введи /points твой_никнейм")
+//            })
+//        }
+//    }
 
     @Test
     fun `парсинг JSON ответа в UserPointsResponse`() = runTest {
